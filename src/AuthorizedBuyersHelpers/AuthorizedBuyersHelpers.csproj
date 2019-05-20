@@ -5,10 +5,10 @@
     <AssemblyName>Inasync.AuthorizedBuyersHelpers</AssemblyName>
     <RootNamespace>AuthorizedBuyersHelpers</RootNamespace>
     <Authors>inasync</Authors>
-    <Description>Authorized Buyers helper library.</Description>
+    <Description>A .NET helper library for Authorized Buyers RTB.</Description>
     <PackageProjectUrl>https://github.com/in-async/AuthorizedBuyersHelpers</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/in-async/AuthorizedBuyersHelpers/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageTags>library</PackageTags>
+    <PackageTags>library rtb</PackageTags>
     <Version>0.1.0</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
