@@ -11,9 +11,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizedBuyersHelpers", "src\AuthorizedBuyersHelpers\AuthorizedBuyersHelpers.csproj", "{52A6E37B-AD44-477A-BAAC-4B2738C68280}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizedBuyersHelpers", "src\AuthorizedBuyersHelpers\AuthorizedBuyersHelpers.csproj", "{52A6E37B-AD44-477A-BAAC-4B2738C68280}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizedBuyersHelpers.Tests", "tests\AuthorizedBuyersHelpers.Tests\AuthorizedBuyersHelpers.Tests.csproj", "{9C4E534C-B245-4C71-9E0B-CE08DD894238}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizedBuyersHelpers.Tests", "tests\AuthorizedBuyersHelpers.Tests\AuthorizedBuyersHelpers.Tests.csproj", "{9C4E534C-B245-4C71-9E0B-CE08DD894238}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9989A26D-A8AB-4D66-884B-F04A58762221}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F0E6A6DF-1A4A-4A28-BC44-796AC0DDC866}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +36,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{52A6E37B-AD44-477A-BAAC-4B2738C68280} = {9989A26D-A8AB-4D66-884B-F04A58762221}
+		{9C4E534C-B245-4C71-9E0B-CE08DD894238} = {F0E6A6DF-1A4A-4A28-BC44-796AC0DDC866}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {689A5D26-EAD1-461E-ACFE-8FE54768D1F1}

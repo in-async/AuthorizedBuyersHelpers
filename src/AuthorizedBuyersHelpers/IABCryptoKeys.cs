@@ -10,12 +10,12 @@
     public interface IABCryptoKeys {
 
         /// <summary>
-        /// 暗号化キー。
+        /// 暗号化キー。常に非 <c>null</c>。
         /// </summary>
         byte[] EncryptionKey { get; }
 
         /// <summary>
-        /// 整合性キー。
+        /// 整合性キー。常に非 <c>null</c>。
         /// </summary>
         byte[] IntegrityKey { get; }
     }
