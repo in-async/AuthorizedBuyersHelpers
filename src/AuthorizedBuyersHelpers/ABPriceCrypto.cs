@@ -27,27 +27,14 @@ namespace AuthorizedBuyersHelpers {
         /// <summary>
         /// Authorized Buyers <c>AUCTION_PRICE</c> を復号します。
         /// </summary>
-        /// <param name="ciperPrice">Authorized Buyers の <c>AUCTION_PRICE</c>。</param>
+        /// <param name="cipherPrice">Authorized Buyers の <c>AUCTION_PRICE</c>。</param>
         /// <param name="price">復号された <c>AUCTION_PRICE</c>。</param>
         /// <returns>復号に成功すれば <c>true</c>、それ以外なら <c>false</c>。</returns>
-        public bool TryDecrypt(string ciperPrice, out decimal price) {
-            if (string.IsNullOrEmpty(ciperPrice)) {
-                price = 0;
-                return false;
-            }
+        public bool TryDecrypt(string cipherPrice, out decimal price) {
+            if (string.IsNullOrEmpty(cipherPrice)) { goto Failure; }
 
-            byte[] encPrice;
-            try {
-                encPrice = Base64Url.Decode(ciperPrice);
-            }
-            catch (FormatException) {
-                price = 0;
-                return false;
-            }
-            if (encPrice.Length != 28) {
-                price = 0;
-                return false;
-            }
+            if (!Base64Url.TryDecode(cipherPrice, out var encPrice)) { goto Failure; }
+            if (encPrice.Length != 28) { goto Failure; }
 
             var iv = new ArraySegment<byte>(encPrice, 0, 16);
             var p = new ArraySegment<byte>(encPrice, 16, 8);
@@ -57,32 +44,28 @@ namespace AuthorizedBuyersHelpers {
             using (var hmac = new HMACSHA1(_keys.EncryptionKey)) {
                 var pricePad = hmac.ComputeHash(iv.Array, iv.Offset, iv.Count).Take(8).ToArray();
 
-                if (!TryXor(p, pricePad, out microPrice)) {
-                    price = 0;
-                    return false;
-                }
+                if (!TryXor(p, pricePad, out microPrice)) { goto Failure; }
             }
 
-            bool success;
             using (var hmac = new HMACSHA1(_keys.IntegrityKey)) {
                 var buff = new byte[microPrice.Length + iv.Count];
                 Buffer.BlockCopy(microPrice, 0, buff, 0, microPrice.Length);
                 Buffer.BlockCopy(iv.Array, iv.Offset, buff, microPrice.Length, iv.Count);
                 var confSig = hmac.ComputeHash(buff).Take(4);
 
-                success = sig.SequenceEqual(confSig);
+                var success = sig.SequenceEqual(confSig);
+                if (!success) { goto Failure; }
             }
 
-            if (success) {
-                if (BitConverter.IsLittleEndian) {
-                    Array.Reverse(microPrice);
-                }
-                price = (decimal)BitConverter.ToInt64(microPrice, 0) / 1000000;
+            if (BitConverter.IsLittleEndian) {
+                Array.Reverse(microPrice);
             }
-            else {
-                price = 0;
-            }
-            return success;
+            price = (decimal)BitConverter.ToInt64(microPrice, 0) / 1000000;
+            return true;
+
+Failure:
+            price = 0;
+            return false;
         }
 
         private static bool TryXor(IReadOnlyList<byte> x, IReadOnlyList<byte> y, out byte[] results) {
