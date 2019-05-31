@@ -42,7 +42,7 @@ namespace AuthorizedBuyersHelpers {
 
             byte[] microPrice;
             using (var hmac = new HMACSHA1(_keys.EncryptionKey)) {
-                var pricePad = hmac.ComputeHash(iv.Array, iv.Offset, iv.Count).Take(8).ToArray();
+                var pricePad = new ArraySegment<byte>(hmac.ComputeHash(iv.Array, iv.Offset, iv.Count), 0, 8);
 
                 if (!TryXor(p, pricePad, out microPrice)) { goto Failure; }
             }
