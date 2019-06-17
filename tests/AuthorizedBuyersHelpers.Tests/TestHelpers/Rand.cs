@@ -22,6 +22,8 @@ namespace System {
         /// <returns><paramref name="min"/> 以上 <paramref name="max"/> 未満の <see cref="int"/> 値。</returns>
         public static int Int(int min = 0, int max = int.MaxValue) => _rnd.Next(min, max);
 
+        public static long Long() => (long)(-_rnd.NextDouble() * 2 * long.MinValue + long.MinValue);
+
         /// <summary>
         /// <see cref="decimal"/> 値の乱数を返します。
         /// </summary>

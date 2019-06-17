@@ -8,6 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
+		AuthorizedBuyersHelpers.Benchmark.Benchmark-report-github.md = AuthorizedBuyersHelpers.Benchmark.Benchmark-report-github.md
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		README.md = README.md
@@ -21,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9989A26D-A8A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F0E6A6DF-1A4A-4A28-BC44-796AC0DDC866}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizedBuyersHelpers.Benchmark", "tests\AuthorizedBuyersHelpers.Benchmark\AuthorizedBuyersHelpers.Benchmark.csproj", "{E62F2974-DD2A-4EA5-9D5B-644B81E32230}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizedBuyersHelpers.Benchmark", "tests\AuthorizedBuyersHelpers.Benchmark\AuthorizedBuyersHelpers.Benchmark.csproj", "{E62F2974-DD2A-4EA5-9D5B-644B81E32230}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
