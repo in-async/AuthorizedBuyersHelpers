@@ -78,9 +78,10 @@ namespace AuthorizedBuyersHelpers.Tests {
                 TestCase( 2, _crypto, ""                                        , (false, 0)),
                 TestCase( 3, _crypto, "A"                                       , (false, 0)),
                 TestCase( 4, _crypto, "AA"                                      , (false, 0)),
-                TestCase( 5, _crypto, "5nmwvgAM0UABI0VniavN72_sy3T6V9ohlpvOpA==", (true , 1.2m)),
-                TestCase( 6, _crypto, "5nmwvgAM0UABI0VniavN72_sy3T6V9oglpvOpA==", (false, 0)),  // ペイロード改竄。
-                TestCase( 7, _crypto, "OG46wAAMCggBI0VniavN7-mNy0VUYQvRuIJiRw==", (true , 123.45m)),
+                TestCase( 5, _crypto, "OG46wAAMCggBI0VniavN7-mNy0VTKPbB3o5CMQ==", (true , 1.2m)),
+                TestCase( 6, _crypto, "5nmwvgAM0UABI0VniavN72_sy3T6V9ohlpvOpA==", (true , 1.2m)),
+                TestCase( 7, _crypto, "5nmwvgAM0UABI0VniavN72_sy3T6V9oglpvOpA==", (false, 0)),  // ペイロード改竄。
+                TestCase( 8, _crypto, "OG46wAAMCggBI0VniavN7-mNy0VUYQvRuIJiRw==", (true , 123.45m)),
             }.Run();
         }
 
