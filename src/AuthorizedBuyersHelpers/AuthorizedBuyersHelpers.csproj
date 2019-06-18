@@ -9,12 +9,12 @@
     <PackageProjectUrl>https://github.com/in-async/AuthorizedBuyersHelpers</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/in-async/AuthorizedBuyersHelpers/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>library rtb</PackageTags>
-    <Version>1.0.0-alpha.2</Version>
+    <Version>1.0.0-alpha.3</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Inasync.DotNetExtra" Version="1.3.0" />
+    <PackageReference Include="Inasync.DotNetExtra" Version="1.3.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
