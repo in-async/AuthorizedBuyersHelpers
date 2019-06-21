@@ -12,11 +12,11 @@ Frequency=2343749 Hz, Resolution=426.6668 ns, Timer=TSC
 ```
 |          Method |  Job | Runtime |      Mean |     Error |    StdDev |    Median |  Gen 0 | Gen 1 | Gen 2 | Allocated |
 |---------------- |----- |-------- |----------:|----------:|----------:|----------:|-------:|------:|------:|----------:|
-|      TryEncrypt |  Clr |     Clr | 11.491 us | 0.4985 us | 1.3896 us | 11.009 us | 0.2594 |     - |     - |     416 B |
-|      TryDecrypt |  Clr |     Clr | 10.904 us | 0.4776 us | 0.4467 us | 10.751 us | 0.2594 |     - |     - |     416 B |
-|    EncryptPrice |  Clr |     Clr | 12.361 us | 0.4431 us | 1.2997 us | 11.946 us | 0.3815 |     - |     - |     605 B |
-| TryDecryptPrice |  Clr |     Clr | 10.967 us | 0.0910 us | 0.0760 us | 10.961 us | 0.3662 |     - |     - |     584 B |
-|      TryEncrypt | Core |    Core |  1.746 us | 0.0342 us | 0.0286 us |  1.736 us | 0.1202 |     - |     - |     192 B |
-|      TryDecrypt | Core |    Core |  1.901 us | 0.0635 us | 0.1823 us |  1.836 us | 0.1202 |     - |     - |     192 B |
-|    EncryptPrice | Core |    Core |  2.570 us | 0.0769 us | 0.2218 us |  2.462 us | 0.2403 |     - |     - |     382 B |
-| TryDecryptPrice | Core |    Core |  2.523 us | 0.0905 us | 0.2611 us |  2.410 us | 0.2251 |     - |     - |     360 B |
+|      TryEncrypt |  Clr |     Clr | 10.691 us | 0.2441 us | 0.7042 us | 10.401 us | 0.2594 |     - |     - |     416 B |
+|      TryDecrypt |  Clr |     Clr | 11.282 us | 0.2918 us | 0.8559 us | 10.984 us | 0.2594 |     - |     - |     416 B |
+|    EncryptPrice |  Clr |     Clr | 11.327 us | 0.2253 us | 0.5132 us | 11.261 us | 0.3815 |     - |     - |     605 B |
+| TryDecryptPrice |  Clr |     Clr | 11.360 us | 0.2272 us | 0.6181 us | 11.232 us | 0.3662 |     - |     - |     584 B |
+|      TryEncrypt | Core |    Core |  1.734 us | 0.0234 us | 0.0183 us |  1.734 us | 0.1183 |     - |     - |     192 B |
+|      TryDecrypt | Core |    Core |  1.805 us | 0.0359 us | 0.0920 us |  1.781 us | 0.1202 |     - |     - |     192 B |
+|    EncryptPrice | Core |    Core |  2.459 us | 0.0502 us | 0.1173 us |  2.444 us | 0.2403 |     - |     - |     382 B |
+| TryDecryptPrice | Core |    Core |  2.396 us | 0.0479 us | 0.1219 us |  2.373 us | 0.2251 |     - |     - |     360 B |
