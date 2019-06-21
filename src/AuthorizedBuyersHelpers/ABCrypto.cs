@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace AuthorizedBuyersHelpers {
 
@@ -18,7 +19,9 @@ namespace AuthorizedBuyersHelpers {
     /// https://github.com/google/openrtb-doubleclick/wiki#cryptography
     /// https://developers.google.com/authorized-buyers/rtb/response-guide/decrypt-price
     /// </remarks>
-    public class ABCrypto {
+    public class ABCrypto : IDisposable {
+        private readonly ThreadLocal<HMACSHA1> _encryptionHmac;
+        private readonly ThreadLocal<HMACSHA1> _integrityHmac;
 
         /// <summary>
         /// 暗号化に使用される初期化ベクトルのバイトサイズ。
@@ -50,16 +53,42 @@ namespace AuthorizedBuyersHelpers {
         /// </summary>
         private const int _maxSections = 3 * 256 + 1;
 
-        private readonly IABCryptoKeys _keys;
-
         /// <summary>
         /// <see cref="ABCrypto"/> クラスの新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="keys">Authorized Buyers の暗号化スキームが必要とするキーセット。</param>
         /// <exception cref="ArgumentNullException"><paramref name="keys"/> is <c>null</c>.</exception>
         public ABCrypto(IABCryptoKeys keys) {
-            _keys = keys ?? throw new ArgumentNullException(nameof(keys));
+            if (keys == null) { throw new ArgumentNullException(nameof(keys)); }
+
+            _encryptionHmac = new ThreadLocal<HMACSHA1>(() => new HMACSHA1(keys.EncryptionKey), trackAllValues: true);
+            _integrityHmac = new ThreadLocal<HMACSHA1>(() => new HMACSHA1(keys.IntegrityKey), trackAllValues: true);
         }
+
+        #region IDisposable Support
+
+        private bool _disposed = false;
+
+        /// <summary>
+        /// <see cref="IDisposable.Dispose"/> の実装。
+        /// </summary>
+        public void Dispose() {
+            if (!_disposed) {
+                foreach (var x in _encryptionHmac.Values) {
+                    x.Dispose();
+                }
+                _encryptionHmac.Dispose();
+
+                foreach (var x in _integrityHmac.Values) {
+                    x.Dispose();
+                }
+                _integrityHmac.Dispose();
+
+                _disposed = true;
+            }
+        }
+
+        #endregion IDisposable Support
 
         /// <summary>
         /// 平文を暗号化します。
@@ -202,20 +231,18 @@ Failure:
                 counter.Fill(0);
 
                 var counterSize = 0;
-                using (var hmac = new HMACSHA1(_keys.EncryptionKey)) {
-                    for (var sectionIndex = 0; sectionIndex < sectionCount; sectionIndex++) {
-                        var sectionOffset = sectionIndex * _sectionSize;
-                        var section = payload.Slice(sectionOffset, Math.Min(payload.Length - sectionOffset, _sectionSize));
+                for (var sectionIndex = 0; sectionIndex < sectionCount; sectionIndex++) {
+                    var sectionOffset = sectionIndex * _sectionSize;
+                    var section = payload.Slice(sectionOffset, Math.Min(payload.Length - sectionOffset, _sectionSize));
 
-                        var pad = hmac.ComputeHash(padMessage, 0, iv.Length + counterSize);
+                    var pad = _encryptionHmac.Value.ComputeHash(padMessage, 0, iv.Length + counterSize);
 
-                        for (var i = 0; i < section.Length; i++) {
-                            section[i] ^= pad[i];
-                        }
+                    for (var i = 0; i < section.Length; i++) {
+                        section[i] ^= pad[i];
+                    }
 
-                        if (counterSize == 0 || ++counter[counterSize - 1] == 0) {
-                            counterSize++;
-                        }
+                    if (counterSize == 0 || ++counter[counterSize - 1] == 0) {
+                        counterSize++;
                     }
                 }
             }
@@ -235,18 +262,16 @@ Failure:
             Debug.Assert(playinBytes.Length <= MaxPayloadSize);
             Debug.Assert(destination.Length == SignatureSize);
 
-            using (var hmac = new HMACSHA1(_keys.IntegrityKey)) {
-                var message = ArrayPool<byte>.Shared.Rent(playinBytes.Length + iv.Length);
-                try {
-                    playinBytes.CopyTo(message);
-                    iv.CopyTo(message.AsSpan(playinBytes.Length));
+            var message = ArrayPool<byte>.Shared.Rent(playinBytes.Length + iv.Length);
+            try {
+                playinBytes.CopyTo(message);
+                iv.CopyTo(message.AsSpan(playinBytes.Length));
 
-                    var signature = hmac.ComputeHash(message, 0, playinBytes.Length + iv.Length).AsSpan(0, SignatureSize);
-                    signature.CopyTo(destination);
-                }
-                finally {
-                    ArrayPool<byte>.Shared.Return(message, clearArray: true);
-                }
+                var signature = _integrityHmac.Value.ComputeHash(message, 0, playinBytes.Length + iv.Length).AsSpan(0, SignatureSize);
+                signature.CopyTo(destination);
+            }
+            finally {
+                ArrayPool<byte>.Shared.Return(message, clearArray: true);
             }
         }
     }

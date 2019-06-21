@@ -22,6 +22,19 @@ namespace AuthorizedBuyersHelpers.Tests {
         }
 
         [TestMethod]
+        public void Dispose() {
+            var crypto = new ABCrypto(new StubABCryptoKeys(
+                  eKey: Base64Url.Decode("sIxwz7yw62yrfoLGt12lIHKuYrK_S5kLuApI2BQe7Ac=")
+                , iKey: Base64Url.Decode("v3fsVcMBMMHYzRhi7SpM0sdqwzvAxM6KPTu9OtVod5I=")
+            ));
+            crypto.TryDecryptPrice(crypto.EncryptPrice(default), out _);
+
+            new TestCaseRunner()
+                .Run(() => crypto.Dispose())
+                .Verify(_ => { }, (Type)null);
+        }
+
+        [TestMethod]
         public void Encrypt() {
             var crypto = new ABCrypto(new StubABCryptoKeys(
                   eKey: Base64Url.Decode("sIxwz7yw62yrfoLGt12lIHKuYrK_S5kLuApI2BQe7Ac=")
