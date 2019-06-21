@@ -34,7 +34,7 @@ namespace AuthorizedBuyersHelpers.Tests {
                 TestCase( 3, rndCrypto, 1.2m   ),
                 TestCase( 4, rndCrypto, 123.45m),
                 TestCase(10, rndCrypto, (decimal)Rand.Long() / 1_000_000),
-            }.Run();
+            }.Run(parallelPerAction: 10);
         }
 
         [TestMethod]
@@ -61,7 +61,7 @@ namespace AuthorizedBuyersHelpers.Tests {
                 TestCase(11, _crypto, (decimal)long.MinValue / 1_000_000 - 0.000001m, iv, default, typeof(OverflowException)),
                 TestCase(12, _crypto, (decimal)long.MaxValue / 1_000_000, iv, "OG46wAAMCggBI0VniavN75ZyNLqsxUa-p2RaNA=="),
                 TestCase(13, _crypto, (decimal)long.MaxValue / 1_000_000 + 1, iv, default, typeof(OverflowException)),
-            }.Run();
+            }.Run(parallelPerAction: 10);
         }
 
         [TestMethod]
@@ -82,7 +82,7 @@ namespace AuthorizedBuyersHelpers.Tests {
                 TestCase( 6, _crypto, "5nmwvgAM0UABI0VniavN72_sy3T6V9ohlpvOpA==", (true , 1.2m)),
                 TestCase( 7, _crypto, "5nmwvgAM0UABI0VniavN72_sy3T6V9oglpvOpA==", (false, 0)),  // ペイロード改竄。
                 TestCase( 8, _crypto, "OG46wAAMCggBI0VniavN7-mNy0VUYQvRuIJiRw==", (true , 123.45m)),
-            }.Run();
+            }.Run(parallelPerAction: 10);
         }
 
         #region Helpers
