@@ -22,19 +22,20 @@ namespace AuthorizedBuyersHelpers.Tests {
                     }, expectedExceptionType);
             };
 
-            var rndCrypto = new ABCrypto(new StubABCryptoKeys(
+            using (var crypto = new ABCrypto(new StubABCryptoKeys(
                   eKey: Rand.Bytes()
                 , iKey: Rand.Bytes()
-            ));
-            new[] {
-                TestCase( 0, null     , 0m, typeof(ArgumentNullException)),
-                TestCase( 0, rndCrypto, 0m     ),
-                TestCase( 1, rndCrypto, -1.2m  ),
-                TestCase( 2, rndCrypto, 0.123m ),
-                TestCase( 3, rndCrypto, 1.2m   ),
-                TestCase( 4, rndCrypto, 123.45m),
-                TestCase(10, rndCrypto, (decimal)Rand.Long() / 1_000_000),
-            }.Run(parallelPerAction: 10);
+            ))) {
+                new[] {
+                    TestCase( 0, null  , 0m, typeof(ArgumentNullException)),
+                    TestCase( 0, crypto, 0m     ),
+                    TestCase( 1, crypto, -1.2m  ),
+                    TestCase( 2, crypto, 0.123m ),
+                    TestCase( 3, crypto, 1.2m   ),
+                    TestCase( 4, crypto, 123.45m),
+                    TestCase(10, crypto, (decimal)Rand.Long() / 1_000_000),
+                }.Run(parallelPerAction: 10);
+            }
         }
 
         [TestMethod]
@@ -87,10 +88,15 @@ namespace AuthorizedBuyersHelpers.Tests {
 
         #region Helpers
 
-        private readonly ABCrypto _crypto = new ABCrypto(new StubABCryptoKeys(
+        private static readonly ABCrypto _crypto = new ABCrypto(new StubABCryptoKeys(
               eKey: Base64Url.Decode("sIxwz7yw62yrfoLGt12lIHKuYrK_S5kLuApI2BQe7Ac=")
             , iKey: Base64Url.Decode("v3fsVcMBMMHYzRhi7SpM0sdqwzvAxM6KPTu9OtVod5I=")
         ));
+
+        [ClassCleanup]
+        public static void ClassCleanup() {
+            _crypto.Dispose();
+        }
 
         #endregion Helpers
     }

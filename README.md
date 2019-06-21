@@ -15,30 +15,34 @@
 ## Usage
 ### Decrypt Price
 ```cs
-var crypto = new ABCrypto(new StubABCryptoKeys(
+var cryptoKeys = new StubABCryptoKeys(
       eKey: Base64Url.Decode("sIxwz7yw62yrfoLGt12lIHKuYrK_S5kLuApI2BQe7Ac=")
     , iKey: Base64Url.Decode("v3fsVcMBMMHYzRhi7SpM0sdqwzvAxM6KPTu9OtVod5I=")
-));
+);
 
-var cipherPrice = "OG46wAAMCggBI0VniavN7-mNy0VTKPbB3o5CMQ==";
-var success = crypto.TryDecryptPrice(cipherPrice, out var price);
+using (var crypto = new ABCrypto(cryptoKeys)) {
+  var cipherPrice = "OG46wAAMCggBI0VniavN7-mNy0VTKPbB3o5CMQ==";
+  var success = crypto.TryDecryptPrice(cipherPrice, out var price);
 
-Console.WriteLine(success);  // true
-Console.WriteLine(price);  // 1.2
+  Console.WriteLine(success);  // true
+  Console.WriteLine(price);  // 1.2
+}
 ```
 
 ### Encrypt Price
 ```cs
-var crypto = new ABCrypto(new StubABCryptoKeys(
+var cryptoKeys = new StubABCryptoKeys(
       eKey: Base64Url.Decode("sIxwz7yw62yrfoLGt12lIHKuYrK_S5kLuApI2BQe7Ac=")
     , iKey: Base64Url.Decode("v3fsVcMBMMHYzRhi7SpM0sdqwzvAxM6KPTu9OtVod5I=")
-));
+);
 
-var price = 1.2m;
-var iv = Base16.Decode("386E3AC0000C0A080123456789ABCDEF");
-var cipherPrice = crypto.EncryptPrice(price, iv);
+using (var crypto = new ABCrypto(cryptoKeys)) {
+  var price = 1.2m;
+  var iv = Base16.Decode("386E3AC0000C0A080123456789ABCDEF");
+  var cipherPrice = crypto.EncryptPrice(price, iv);
 
-Console.WriteLine(cipherPrice);  // OG46wAAMCggBI0VniavN7-mNy0VTKPbB3o5CMQ==
+  Console.WriteLine(cipherPrice);  // OG46wAAMCggBI0VniavN7-mNy0VTKPbB3o5CMQ==
+}
 ```
 
 
