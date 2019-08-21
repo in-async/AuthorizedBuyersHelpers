@@ -5,14 +5,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace AuthorizedBuyersHelpers.Tests {
 
     [TestClass]
-    public class ABCryptoPriceExtensionsTests {
+    public class ABPriceCryptoTests {
 
         [TestMethod]
         public void EncryptPrice_AutoIV() {
             Action TestCase(int testNumber, ABCrypto crypto, decimal price, Type expectedExceptionType = null) => () => {
                 new TestCaseRunner($"No.{testNumber}")
                     .Run(() => {
-                        var cipher = ABCryptoPriceExtensions.EncryptPrice(crypto, price);
+                        var cipher = ABPriceCrypto.EncryptPrice(crypto, price);
                         Console.WriteLine(cipher);
                         return (success: crypto.TryDecryptPrice(cipher, out var actualPrice), price: actualPrice);
                     })
@@ -41,7 +41,7 @@ namespace AuthorizedBuyersHelpers.Tests {
         public void EncryptPrice() {
             Action TestCase(int testNumber, ABCrypto crypto, decimal price, byte[] inputIV, string expected, Type expectedExceptionType = null) => () => {
                 new TestCaseRunner($"No.{testNumber}")
-                    .Run(() => ABCryptoPriceExtensions.EncryptPrice(crypto, price, inputIV))
+                    .Run(() => ABPriceCrypto.EncryptPrice(crypto, price, inputIV))
                     .Verify(expected, expectedExceptionType);
             };
 
@@ -65,10 +65,15 @@ namespace AuthorizedBuyersHelpers.Tests {
         }
 
         [TestMethod]
+        public void TryEncryptPrice_ReadOnlySpan() {
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
         public void TryDecryptPrice() {
             Action TestCase(int testNumber, ABCrypto crypto, string cipherPrice, (bool, decimal) expected, Type expectedExceptionType = null) => () => {
                 new TestCaseRunner($"No.{testNumber}")
-                    .Run(() => (ABCryptoPriceExtensions.TryDecryptPrice(crypto, cipherPrice, out var price), price))
+                    .Run(() => (ABPriceCrypto.TryDecryptPrice(crypto, cipherPrice, out var price), price))
                     .Verify(expected, expectedExceptionType);
             };
 
@@ -83,6 +88,11 @@ namespace AuthorizedBuyersHelpers.Tests {
                 TestCase( 7, _crypto, "5nmwvgAM0UABI0VniavN72_sy3T6V9oglpvOpA==", (false, 0)),  // ペイロード改竄。
                 TestCase( 8, _crypto, "OG46wAAMCggBI0VniavN7-mNy0VUYQvRuIJiRw==", (true , 123.45m)),
             }.Run();
+        }
+
+        [TestMethod]
+        public void TryDecryptPrice_Span() {
+            Assert.Inconclusive();
         }
 
         #region Helpers
