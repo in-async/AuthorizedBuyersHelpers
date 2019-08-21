@@ -26,7 +26,7 @@ namespace AuthorizedBuyersHelpers {
         /// 成功した場合は常に <see cref="ABCrypto.IVSize"/> になります。
         /// </param>
         /// <returns>生成に成功した場合は <c>true</c>、失敗した場合は <c>false</c> となります。</returns>
-        public static bool TryCreate(in Span<byte> destination, out int bytesWritten) {
+        public static bool TryCreate(Span<byte> destination, out int bytesWritten) {
             var rnd = _random.Value;
             var serverId = (long)rnd.Next() << 32 | (long)rnd.Next();
             return TryCreate(DateTime.UtcNow, serverId, destination, out bytesWritten);
@@ -47,7 +47,7 @@ namespace AuthorizedBuyersHelpers {
         /// <paramref name="destination"/> の長さが <see cref="ABCrypto.IVSize"/> に満たない場合、
         /// または <paramref name="date"/> が <see cref="UnixTime.Epoch"/> より古い日時の場合、<c>false</c> となります。
         /// </returns>
-        public static bool TryCreate(DateTime date, long serverId, in Span<byte> destination, out int bytesWritten) {
+        public static bool TryCreate(DateTime date, long serverId, Span<byte> destination, out int bytesWritten) {
             if (destination.Length < ABCrypto.IVSize) {
                 bytesWritten = 0;
                 return false;
