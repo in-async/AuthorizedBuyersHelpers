@@ -81,7 +81,7 @@ namespace AuthorizedBuyersHelpers {
         /// <paramref name="plainBytes"/> の長さが <see cref="MaxPayloadSize"/> を超えています。
         /// または、<paramref name="cipherBytes"/> の長さが <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値を満たしません。
         /// </exception>
-        public void Encrypt(in ReadOnlySpan<byte> plainBytes, in ReadOnlySpan<byte> inputIV, in Span<byte> cipherBytes, out int bytesWritten) {
+        public void Encrypt(ReadOnlySpan<byte> plainBytes, ReadOnlySpan<byte> inputIV, Span<byte> cipherBytes, out int bytesWritten) {
             if (plainBytes.Length > MaxPayloadSize) { throw new ArgumentOutOfRangeException($"{nameof(plainBytes)} の長さが {plainBytes.Length} です。これは最大長 {MaxPayloadSize} を超えています。", nameof(plainBytes)); }
             if (cipherBytes.Length < plainBytes.Length + OverheadSize) { throw new ArgumentOutOfRangeException($"{nameof(cipherBytes)} の長さは {cipherBytes.Length} ですが、少なくとも {plainBytes.Length + OverheadSize} 必要です。", nameof(cipherBytes)); }
 
@@ -110,7 +110,7 @@ namespace AuthorizedBuyersHelpers {
         /// <paramref name="plainBytes"/> の長さが <see cref="MaxPayloadSize"/> を超えているか、
         /// <paramref name="cipherBytes"/> の長さが <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値を満たしていない場合は <c>false</c>。
         /// </returns>
-        public bool TryEncrypt(in ReadOnlySpan<byte> plainBytes, in ReadOnlySpan<byte> inputIV, in Span<byte> cipherBytes, out int bytesWritten) {
+        public bool TryEncrypt(ReadOnlySpan<byte> plainBytes, ReadOnlySpan<byte> inputIV, Span<byte> cipherBytes, out int bytesWritten) {
             if (plainBytes.Length > MaxPayloadSize) { goto Failure; }
             if (cipherBytes.Length < plainBytes.Length + OverheadSize) { goto Failure; }
 
@@ -157,7 +157,7 @@ Failure:
         ///     <term>復号化された平文から作成した署名が、<paramref name="cipherBytes"/> に含まれる署名と一致しない。</term>
         /// </list>
         /// </returns>
-        public bool TryDecrypt(in ReadOnlySpan<byte> cipherBytes, in Span<byte> plainBytes, out int bytesWritten) {
+        public bool TryDecrypt(ReadOnlySpan<byte> cipherBytes, Span<byte> plainBytes, out int bytesWritten) {
             var payloadSize = cipherBytes.Length - OverheadSize;
             if (payloadSize < 0) { goto Failure; }
             if (payloadSize > MaxPayloadSize) { goto Failure; }
@@ -186,7 +186,7 @@ Failure:
         /// </summary>
         /// <param name="iv">暗号化に使用される初期化ベクトル。</param>
         /// <param name="payload">XOR 暗号を適用するペイロード。</param>
-        private void XorPayload(in ReadOnlySpan<byte> iv, in Span<byte> payload) {
+        private void XorPayload(ReadOnlySpan<byte> iv, Span<byte> payload) {
             Debug.Assert(iv.Length == IVSize);
             Debug.Assert(payload.Length <= MaxPayloadSize);
 
@@ -230,7 +230,7 @@ Failure:
         /// <param name="iv">署名に使用される初期化ベクトル。</param>
         /// <param name="playinBytes">署名対象の平文。</param>
         /// <param name="destination">書名の書き込み先となる <see cref="byte"/> スパン。</param>
-        private void ComputeSignature(in ReadOnlySpan<byte> iv, in ReadOnlySpan<byte> playinBytes, in Span<byte> destination) {
+        private void ComputeSignature(ReadOnlySpan<byte> iv, ReadOnlySpan<byte> playinBytes, Span<byte> destination) {
             Debug.Assert(iv.Length == IVSize);
             Debug.Assert(playinBytes.Length <= MaxPayloadSize);
             Debug.Assert(destination.Length == SignatureSize);
