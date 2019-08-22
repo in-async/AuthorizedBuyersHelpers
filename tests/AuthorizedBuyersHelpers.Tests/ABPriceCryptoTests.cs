@@ -66,12 +66,11 @@ namespace AuthorizedBuyersHelpers.Tests {
 
         [TestMethod]
         public void TryEncryptPrice_ReadOnlySpan() {
-            Action TestCase(int testNumber, ABCrypto crypto, decimal price, byte[] inputIV, byte[] cipherBytes, (bool success, int bytesWritten, byte[] cipherBytes) expected, Type expectedExceptionType = null) => () => {
+            Action TestCase(int testNumber, ABCrypto crypto, decimal price, byte[] inputIV, byte[] cipherBytes, (bool success, byte[] cipherBytes) expected, Type expectedExceptionType = null) => () => {
                 new TestCaseRunner($"No.{testNumber}")
-                    .Run(() => (success: ABPriceCrypto.TryEncryptPrice(crypto, price, inputIV, cipherBytes, out var bytesWritten), cipherBytes, bytesWritten))
+                    .Run(() => (success: ABPriceCrypto.TryEncryptPrice(crypto, price, inputIV, cipherBytes), cipherBytes))
                     .Verify((actual, desc) => {
                         actual.success.Is(expected.success, desc);
-                        actual.bytesWritten.Is(expected.bytesWritten, desc);
                         actual.cipherBytes.Is(expected.cipherBytes, desc);
                     }, expectedExceptionType);
             };
@@ -81,17 +80,17 @@ namespace AuthorizedBuyersHelpers.Tests {
             var longIV = Base16.Decode("386E3AC0000C0A080123456789ABCDEF01");
             new[] {
                 TestCase( 0, null   , 0m     , iv     , new byte[28], default, typeof(ArgumentNullException)),
-                TestCase( 1, _crypto, 0m     , iv     , new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VTOrlB8A3F8A=="))),
-                TestCase( 2, _crypto, -1.2m  , iv     , new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavN7xZyNLqs1wnBKd_m9w=="))),
-                TestCase( 3, _crypto, 0.123m , iv     , new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VTO1k5XIpbSg=="))),
-                TestCase( 4, _crypto, 1.2m   , iv     , new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VTKPbB3o5CMQ=="))),
-                TestCase( 5, _crypto, 123.45m, iv     , new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VUYQvRuIJiRw=="))),
-                TestCase( 6, _crypto, 123.45m, shortIV, new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavNAF7WOkwZcM1moYKxlA=="))),
-                TestCase( 7, _crypto, 123.45m, longIV , new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VUYQvRuIJiRw=="))),
-                TestCase( 8, _crypto, 1.2m   , iv     , new byte[27], (false, 0, new byte[27])),
-                TestCase(10, _crypto, (decimal)long.MinValue / 1_000_000            , iv, new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavN72mNy0VTOrlBMgsdYg=="))),
+                TestCase( 1, _crypto, 0m     , iv     , new byte[28], (true , Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VTOrlB8A3F8A=="))),
+                TestCase( 2, _crypto, -1.2m  , iv     , new byte[28], (true , Base64Url.Decode("OG46wAAMCggBI0VniavN7xZyNLqs1wnBKd_m9w=="))),
+                TestCase( 3, _crypto, 0.123m , iv     , new byte[28], (true , Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VTO1k5XIpbSg=="))),
+                TestCase( 4, _crypto, 1.2m   , iv     , new byte[28], (true , Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VTKPbB3o5CMQ=="))),
+                TestCase( 5, _crypto, 123.45m, iv     , new byte[28], (true , Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VUYQvRuIJiRw=="))),
+                TestCase( 6, _crypto, 123.45m, shortIV, new byte[28], (true , Base64Url.Decode("OG46wAAMCggBI0VniavNAF7WOkwZcM1moYKxlA=="))),
+                TestCase( 7, _crypto, 123.45m, longIV , new byte[28], (true , Base64Url.Decode("OG46wAAMCggBI0VniavN7-mNy0VUYQvRuIJiRw=="))),
+                TestCase( 8, _crypto, 1.2m   , iv     , new byte[27], (false, new byte[27])),
+                TestCase(10, _crypto, (decimal)long.MinValue / 1_000_000            , iv, new byte[28], (true, Base64Url.Decode("OG46wAAMCggBI0VniavN72mNy0VTOrlBMgsdYg=="))),
                 TestCase(11, _crypto, (decimal)long.MinValue / 1_000_000 - 0.000001m, iv, new byte[28], default, typeof(OverflowException)),
-                TestCase(12, _crypto, (decimal)long.MaxValue / 1_000_000            , iv, new byte[28], (true, 28, Base64Url.Decode("OG46wAAMCggBI0VniavN75ZyNLqsxUa-p2RaNA=="))),
+                TestCase(12, _crypto, (decimal)long.MaxValue / 1_000_000            , iv, new byte[28], (true, Base64Url.Decode("OG46wAAMCggBI0VniavN75ZyNLqsxUa-p2RaNA=="))),
                 TestCase(13, _crypto, (decimal)long.MaxValue / 1_000_000 + 1        , iv, new byte[28], default, typeof(OverflowException)),
             }.Run();
         }

@@ -32,7 +32,7 @@ namespace AuthorizedBuyersHelpers {
             if (crypto == null) { throw new ArgumentNullException(nameof(crypto)); }
 
             Span<byte> iv = stackalloc byte[ABCrypto.IVSize];
-            var success = ABIV.TryCreate(iv, out _);
+            var success = ABIV.TryCreate(iv);
             Debug.Assert(success);
 
             return EncryptPrice(crypto, price, iv);
@@ -58,7 +58,7 @@ namespace AuthorizedBuyersHelpers {
 
             var cipherBytes = ArrayPool<byte>.Shared.RentAsSegment(CipherSize);
             try {
-                var success = TryEncryptPrice(crypto, price, inputIV, cipherBytes, out _);
+                var success = TryEncryptPrice(crypto, price, inputIV, cipherBytes);
                 Debug.Assert(success);
 
                 return ABCipherEncoder.Encode(cipherBytes);
@@ -77,38 +77,30 @@ namespace AuthorizedBuyersHelpers {
         /// 暗号化に使用される初期化ベクトル。
         /// 長さが <see cref="ABCrypto.IVSize"/> に満たない場合は不足分を 0 で埋め、<see cref="ABCrypto.IVSize"/> を超える場合は <see cref="ABCrypto.IVSize"/> まで切り詰めて使用します。
         /// </param>
-        /// <param name="cipherBytes">
+        /// <param name="destination">
         /// 暗号データの書き込み先となる <see cref="byte"/> スパン。
         /// 少なくとも <see cref="CipherSize"/> 以上の長さが必要です。
         /// </param>
-        /// <param name="bytesWritten">
-        /// 実際に <paramref name="cipherBytes"/> に書き込まれたバイトサイズ。
-        /// 暗号化に成功した場合は <see cref="CipherSize"/> の値になります。
-        /// </param>
         /// <returns>
         /// 暗号化に成功した場合は <c>true</c>。
-        /// <paramref name="cipherBytes"/> の長さが <see cref="CipherSize"/> を満たしていない場合は <c>false</c>。
+        /// <paramref name="destination"/> の長さが <see cref="CipherSize"/> を満たしていない場合は <c>false</c>。
         /// </returns>
         /// <exception cref="ArgumentNullException"><paramref name="crypto"/> is <c>null</c>.</exception>
         /// <exception cref="OverflowException">
         /// <paramref name="price"/> が <c><see cref="long.MaxValue"/> / 1_000_000</c> より大きい、
         /// または <c><see cref="long.MinValue"/> / 1_000_000 より小さい。</c>
         /// </exception>
-        public static bool TryEncryptPrice(this ABCrypto crypto, decimal price, ReadOnlySpan<byte> inputIV, Span<byte> cipherBytes, out int bytesWritten) {
+        public static bool TryEncryptPrice(this ABCrypto crypto, decimal price, ReadOnlySpan<byte> inputIV, Span<byte> destination) {
             if (crypto == null) { throw new ArgumentNullException(nameof(crypto)); }
-            if (cipherBytes.Length < CipherSize) { goto Failure; }
+            if (destination.Length < CipherSize) { return false; }
 
             Span<byte> microPriceData = stackalloc byte[PricePayloadSize];
             BinaryPrimitives.WriteInt64BigEndian(microPriceData, (long)(price * MicrosPerCurrencyUnit));
 
-            var success = crypto.TryEncrypt(microPriceData, inputIV, cipherBytes, out bytesWritten);
+            var success = crypto.TryEncrypt(microPriceData, inputIV, destination, out var bytesWritten);
             Debug.Assert(success);
             Debug.Assert(bytesWritten == CipherSize);
             return true;
-
-Failure:
-            bytesWritten = 0;
-            return false;
         }
 
         /// <summary>

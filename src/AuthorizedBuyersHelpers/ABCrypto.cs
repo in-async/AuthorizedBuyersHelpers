@@ -69,23 +69,23 @@ namespace AuthorizedBuyersHelpers {
         /// 暗号化に使用される初期化ベクトル。
         /// 長さが <see cref="IVSize"/> に満たない場合は不足分を 0 で埋め、<see cref="IVSize"/> を超える場合は <see cref="IVSize"/> まで切り詰めて使用します。
         /// </param>
-        /// <param name="cipherBytes">
+        /// <param name="destination">
         /// 暗号文の書き込み先となる <see cref="byte"/> スパン。
         /// 少なくとも <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値以上の長さが必要です。
         /// </param>
         /// <param name="bytesWritten">
-        /// 実際に <paramref name="cipherBytes"/> に書き込まれたバイトサイズ。
+        /// 実際に <paramref name="destination"/> に書き込まれたバイトサイズ。
         /// <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値になります。
         /// </param>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="plainBytes"/> の長さが <see cref="MaxPayloadSize"/> を超えています。
-        /// または、<paramref name="cipherBytes"/> の長さが <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値を満たしません。
+        /// または、<paramref name="destination"/> の長さが <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値を満たしません。
         /// </exception>
-        public void Encrypt(ReadOnlySpan<byte> plainBytes, ReadOnlySpan<byte> inputIV, Span<byte> cipherBytes, out int bytesWritten) {
+        public void Encrypt(ReadOnlySpan<byte> plainBytes, ReadOnlySpan<byte> inputIV, Span<byte> destination, out int bytesWritten) {
             if (plainBytes.Length > MaxPayloadSize) { throw new ArgumentOutOfRangeException($"{nameof(plainBytes)} の長さが {plainBytes.Length} です。これは最大長 {MaxPayloadSize} を超えています。", nameof(plainBytes)); }
-            if (cipherBytes.Length < plainBytes.Length + OverheadSize) { throw new ArgumentOutOfRangeException($"{nameof(cipherBytes)} の長さは {cipherBytes.Length} ですが、少なくとも {plainBytes.Length + OverheadSize} 必要です。", nameof(cipherBytes)); }
+            if (destination.Length < plainBytes.Length + OverheadSize) { throw new ArgumentOutOfRangeException($"{nameof(destination)} の長さは {destination.Length} ですが、少なくとも {plainBytes.Length + OverheadSize} 必要です。", nameof(destination)); }
 
-            var success = TryEncrypt(plainBytes, inputIV, cipherBytes, out bytesWritten);
+            var success = TryEncrypt(plainBytes, inputIV, destination, out bytesWritten);
             Debug.Assert(success);
         }
 
@@ -97,24 +97,24 @@ namespace AuthorizedBuyersHelpers {
         /// 暗号化に使用される初期化ベクトル。
         /// 長さが <see cref="IVSize"/> に満たない場合は不足分を 0 で埋め、<see cref="IVSize"/> を超える場合は <see cref="IVSize"/> まで切り詰めて使用します。
         /// </param>
-        /// <param name="cipherBytes">
+        /// <param name="destination">
         /// 暗号文の書き込み先となる <see cref="byte"/>スパン。
         /// 少なくとも <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値以上の長さが必要です。
         /// </param>
         /// <param name="bytesWritten">
-        /// 実際に <paramref name="cipherBytes"/> に書き込まれたバイトサイズ。
+        /// 実際に <paramref name="destination"/> に書き込まれたバイトサイズ。
         /// <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値になります。
         /// </param>
         /// <returns>
         /// 暗号化に成功した場合は <c>true</c>。
         /// <paramref name="plainBytes"/> の長さが <see cref="MaxPayloadSize"/> を超えているか、
-        /// <paramref name="cipherBytes"/> の長さが <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値を満たしていない場合は <c>false</c>。
+        /// <paramref name="destination"/> の長さが <paramref name="plainBytes"/> の長さと <see cref="OverheadSize"/> を加算した値を満たしていない場合は <c>false</c>。
         /// </returns>
-        public bool TryEncrypt(ReadOnlySpan<byte> plainBytes, ReadOnlySpan<byte> inputIV, Span<byte> cipherBytes, out int bytesWritten) {
+        public bool TryEncrypt(ReadOnlySpan<byte> plainBytes, ReadOnlySpan<byte> inputIV, Span<byte> destination, out int bytesWritten) {
             if (plainBytes.Length > MaxPayloadSize) { goto Failure; }
-            if (cipherBytes.Length < plainBytes.Length + OverheadSize) { goto Failure; }
+            if (destination.Length < plainBytes.Length + OverheadSize) { goto Failure; }
 
-            var iv = cipherBytes.Slice(0, IVSize);
+            var iv = destination.Slice(0, IVSize);
             if (inputIV.Length < IVSize) {
                 inputIV.CopyTo(iv);
                 iv.Slice(inputIV.Length).Fill(0);
@@ -123,11 +123,11 @@ namespace AuthorizedBuyersHelpers {
                 inputIV.Slice(0, IVSize).CopyTo(iv);
             }
 
-            var payload = cipherBytes.Slice(IVSize, plainBytes.Length);
+            var payload = destination.Slice(IVSize, plainBytes.Length);
             plainBytes.CopyTo(payload);
             XorPayload(iv, payload);
 
-            var signature = cipherBytes.Slice(IVSize + plainBytes.Length, SignatureSize);
+            var signature = destination.Slice(IVSize + plainBytes.Length, SignatureSize);
             ComputeSignature(iv, plainBytes, signature);
 
             bytesWritten = IVSize + payload.Length + SignatureSize;
@@ -142,9 +142,9 @@ Failure:
         /// <see cref="ABCrypto"/> で暗号化された暗号文を復号化します。
         /// </summary>
         /// <param name="cipherBytes">復号化対象の暗号文。</param>
-        /// <param name="plainBytes">復号化された平文の書き込み先となる <see cref="byte"/> スパン。</param>
+        /// <param name="destination">復号化された平文の書き込み先となる <see cref="byte"/> スパン。</param>
         /// <param name="bytesWritten">
-        /// 実際に <paramref name="plainBytes"/> に書き込まれたバイトサイズ。
+        /// 実際に <paramref name="destination"/> に書き込まれたバイトサイズ。
         /// <paramref name="cipherBytes"/> の長さから <see cref="OverheadSize"/> を減算した値になります。
         /// </param>
         /// <returns>
@@ -153,11 +153,11 @@ Failure:
         /// <list type="bullet">
         ///     <term><paramref name="cipherBytes"/> の長さが <see cref="OverheadSize"/> を満たさない。</term>
         ///     <term><paramref name="cipherBytes"/> に含まれるペイロードの長さが <see cref="MaxPayloadSize"/> を超えている。</term>
-        ///     <term><paramref name="plainBytes"/> の長さがペイロードの長さを満たさない。</term>
+        ///     <term><paramref name="destination"/> の長さがペイロードの長さを満たさない。</term>
         ///     <term>復号化された平文から作成した署名が、<paramref name="cipherBytes"/> に含まれる署名と一致しない。</term>
         /// </list>
         /// </returns>
-        public bool TryDecrypt(ReadOnlySpan<byte> cipherBytes, Span<byte> plainBytes, out int bytesWritten) {
+        public bool TryDecrypt(ReadOnlySpan<byte> cipherBytes, Span<byte> destination, out int bytesWritten) {
             var payloadSize = cipherBytes.Length - OverheadSize;
             if (payloadSize < 0) { goto Failure; }
             if (payloadSize > MaxPayloadSize) { goto Failure; }
@@ -166,11 +166,11 @@ Failure:
             var payload = cipherBytes.Slice(IVSize, payloadSize);
             var signature = cipherBytes.Slice(IVSize + payloadSize, SignatureSize);
 
-            if (!payload.TryCopyTo(plainBytes)) { goto Failure; }
-            XorPayload(iv, plainBytes);
+            if (!payload.TryCopyTo(destination)) { goto Failure; }
+            XorPayload(iv, destination);
 
             Span<byte> computedSignature = stackalloc byte[SignatureSize];
-            ComputeSignature(iv, plainBytes, computedSignature);
+            ComputeSignature(iv, destination, computedSignature);
             if (!signature.SequenceEqual(computedSignature)) { goto Failure; }
 
             bytesWritten = payload.Length;
