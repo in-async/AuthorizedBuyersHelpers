@@ -32,7 +32,7 @@ namespace AuthorizedBuyersHelpers {
             if (crypto == null) { throw new ArgumentNullException(nameof(crypto)); }
 
             Span<byte> iv = stackalloc byte[ABCrypto.IVSize];
-            var success = ABIV.TryCreate(iv, out _);
+            var success = ABIV.TryCreate(iv);
             Debug.Assert(success);
 
             return EncryptPrice(crypto, price, iv);
